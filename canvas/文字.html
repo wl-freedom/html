@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>haha</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		#canvas{
+			background-color:#fff;
+		}
+	</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script type="text/javascript">
+	 var canvas=document.getElementById("canvas"),
+		context=canvas.getContext("2d"),
+		txtcanvas=document.createElement("canvas"),
+		txtcontext=txtcanvas.getContext("2d");
+		canvas.width=window.innerWidth;
+		canvas.height=window.innerHeight;
+		txtcanvas.height=window.innerHeight;
+		txtcanvas.width=window.innerWidth;
+		txtcontext.font="bold 70px Sans-serif";
+		txtcontext.textAlign="center";
+	 txtcontext.baseline="middle";
+		txtcontext.fillText("freedom",canvas.width/2,canvas.height/2);
+		var imgdata=txtcontext.getImageData(0,0,txtcanvas.width,txtcanvas.height).data;
+		function draw(){
+			for(var y=0;y<canvas.height;y+=4){
+				for(var x=0;x<canvas.width;x+=4){
+					var id=(canvas.width*y+x)*4-1;
+					if(imgdata[id]>0){
+						context.save();
+						context.beginPath();
+						context.arc(x,y,2,0,Math.PI*2,false);
+						context.fillStyle="hsla("+x+",100%,50%,1)";
+						context.fill();
+						context.restore();
+					}
+				}
+			}
+		}
+		draw()
+</script>
+</body>
+</html>

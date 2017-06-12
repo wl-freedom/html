@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>qiqiu</title>
+	<style type="text/css">
+		*{
+			margin:0;
+			padding:0;
+		}
+		body{
+			background: #000;
+		}
+		#wrap{
+			width:200px;
+			height:200px;
+			background:red;
+		}
+		.balloon:after{
+			content:'';
+			display: block;
+			position:absolute;
+			bottom:0px;
+			right:0px;
+			width:0px;
+			height:0px;
+			border:8px solid #dbbdbd;
+			border-top-color:transparent;
+			border-bottom-color:transparent;
+			border-left-color:transparent;
+			transform:rotate(45deg);
+			border-radius:16px;
+		}
+		.balloon{
+			position:absolute;
+			left:0;
+			top:0;
+			margin:auto;
+			width:160px;
+			height:160px;
+			border-radius:160px 160px 64px 160px;
+			transform:rotate(45deg);
+			background:#faf9f9;
+			box-shadow: -8px -8px 80px -8px pink inset,48px 48px 24px rgba(220,150,150,0.2);
+		}
+	</style>
+</head>
+<body>
+<script type="text/javascript">
+	var num=50;
+	var oBody=document.documentElement||document.body;
+	var wW=window.innerWidth;
+	var wH=window.innerHeight;
+	var timer=null;
+	init(num);
+	function init(num){
+		for(var i=0;i<num;i++){
+			var randomL=Math.random()*wW;
+			randomL=Math.min(wW-160,randomL);
+			var balloon=document.createElement("div");
+			balloon.className='balloon';
+			balloon.style.left=randomL+'px';
+			balloon.style.top=wH+'px';
+			balloon.speed=Math.random()*5+1;
+			oBody.appendChild(balloon);
+		}
+	}
+	timer=setInterval(function(){
+		var oBall=document.querySelectorAll('.balloon');
+		for(var i=0,len=oBall.length;i<len;i++){
+			oBall[i].style.top=oBall[i].offsetTop-oBall[i].speed+'px';
+			oBall[i].onclick=function(){
+				crash(this,function(xxx){
+					clearInterval(xxx.timer);
+					xxx.parentNode.removeChild(xxx);
+				})
+				init(1);
+			}
+		}
+	},30);
+	function crash(ele,cb){
+		ele.timeouter=setTimeout(function(){
+			cb(ele);
+		},500);
+		ele.timer=setInterval(function(){
+			ele.speed++;
+			ele.style.top=ele.offsetTop-ele.speed+'px';
+			ele.style.width=ele.offsetWidth-10+'px';
+			ele.style.height=ele.offsetHeight-10+'px';
+		},30)
+	}
+</script>
+</body>
+</html>

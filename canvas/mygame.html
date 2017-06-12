@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>mygame</title>
+	<style type="text/css">
+		body{
+			background-color:#0C1021;
+		}
+		#brick div{
+			position:absolute;
+		}
+		#ward div{
+			position:absolute;
+			border-radius: 2px;
+		}
+		#ball div{
+			position:absolute;
+			border-radius:50%; 
+		}
+		#score{
+			height:30px;
+			width:100px;
+			line-height: 30px;
+			text-align: center;
+			background:#0C7153;
+			position:absolute;
+			top:0;
+			left:0;
+			color:#fff;
+		}
+	</style>
+</head>
+<body>
+<div id="container">
+	<div id="brick"></div>
+	<div id="ball"></div>
+	<div id="ward"></div>
+	<div id="score">分数: 0分</div>
+	<div id="gameover"></div>
+</div>
+	<script type="text/javascript">
+		var oball=$('ball'),
+		 	oward=$('ward'),
+		 	oscore=$('score'),
+		 	obrick=$('brick'),
+		 	gameover=$('gameover'),
+		 	time=null;
+		function $(id){
+			return document.getElementById(id);
+		}
+		function Brick(width,height,top,left,color){
+			this.width=width;
+			this.height=height;
+			this.top=top;
+			this.left=left;
+			this.color=color;
+		}
+		Brick.prototype={
+			constructor:Brick,
+			init:function(){
+				this.createBrick();
+			},
+			createBrick:function(){
+				for(var i=1;i<=8;i++){
+					for(var j=1;j<=15;j++){
+						var div=document.createElement("div");
+						var colors=["red","green","blue","yellow","magenta","cyan","green","blue","magenta","cyan"];
+						var index=Math.floor(Math.random()*10);
+						div.style.backgroundColor=colors[index];
+						div.style.width=this.width+'px';
+						div.style.height=this.height+'px';
+						div.style.top=i*this.top+(i*this.height)+'px';
+						div.style.left=(j*this.left)+(j*this.width)+'px';
+						obrick.appendChild(div);
+					}
+				}
+			}
+		}
+		function Ward(width,height,top,left,color){
+			this.width=width;
+			this.height=height;
+			this.top=top;
+			this.left=left;
+			this.color=color;
+			this.obj=null;
+			this.flag=false;
+		}
+		Ward.prototype={
+			constructor:Ward,
+			init:function(){
+				this.createWard();
+				this.addEvent()
+			},
+			createWard:function(){
+				var div=document.createElement("div");
+				this.obj=div;
+				div.style.width=this.width+'px';
+				div.style.height=this.height+'px';
+				div.style.top=this.top+'px';
+				div.style.left=this.left+'px';
+				div.style.backgroundColor=this.color;
+				oward.appendChild(div);
+			},
+			addEvent:function(){
+					var that=this;
+				document.onkeydown=function(e){
+					if(e&&e.preventDefault){
+						e.preventDefault();
+					}
+					else{
+						window.event.returnValue=false;
+					}
+					e=window.event||e;
+					if(e.keyCode==32){
+						that.flag=true;//还没想好
+					}
+					if(e.keyCode==37){
+						//left
+						that.left=that.left>0?that.left-10:0;
+						oward.removeChild(that.obj);//删了重画
+						that.createWard();
+					}
+					if(e.keyCode==39){
+						//right
+						that.left=that.left<window.innerWidth-that.width?that.left+10:window.innerWidth-that.width;
+						oward.removeChild(that.obj);//删了重画
+						that.createWard();
+					}
+				}
+			}
+		}
+		function Ball(width,height,top,left,color){
+			this.width=width;
+			this.height=height;
+			this.top=top;
+			this.left=left;
+			this.color=color;
+			this.xspeed=4;
+			this.yspeed=4;
+			this.obj=null;
+		}
+		Ball.prototype={
+			constructor:Ball,
+			init:function(){
+				this.createBall();
+				this.Move();
+			},
+			createBall:function(){
+				var div=document.createElement("div");
+				this.obj=div;
+				div.style.width=this.width+'px';
+				div.style.height=this.height+'px';
+				div.style.top=this.top+'px';
+				div.style.left=this.left+'px';
+				div.style.backgroundColor=this.color;
+				oball.appendChild(div);
+			},
+			Move:function(){
+				var that=this;
+				time=setInterval(function(){
+					if(that.top<0){
+						that.yspeed=-that.yspeed;
+					}
+					if(that.left<0||that.left>window.innerWidth-that.width-5){
+						that.xspeed=-that.xspeed;
+					}
+					that.top+=that.yspeed;
+					that.left+=that.xspeed;
+					oball.removeChild(that.obj);
+					that.createBall();
+					that.Crash(that.left+that.width/2,that.top+that.height/2,that.height/2);
+				},20);
+				
+			},
+			Crash:function(x,y,r){
+				for(var i=obrick.children.length-1;i>=0;i--){
+					var borderX_left=parseInt(obrick.children[i].style.left)-r;
+					var borderX_right=parseInt(obrick.children[i].style.left)+parseInt(obrick.children[i].style.width)+r;
+					var borderY_top=parseInt(obrick.children[i].style.top)-r;
+					var borderY_bottom=parseInt(obrick.children[i].style.top)+parseInt(obrick.children[i].style.height)+r;
+					// var left_topX=obrick.children[i].style.left,left_topY=obrick.children[i].style.top;//四个拐角没判断
+					// var right_topX=left_topX+obrick.children[i].style.width,right_topY=left_topY;
+					// var left_bottomX=left_topX,left_bottomY=left_topY+obrick.children[i].style.height;
+					// var right_bottomX=left_bottomX+obrick.children[i].style.width,right_bottomY=left_bottomY;
+					if(x>=borderX_left&&x<=borderX_right&&y>=borderY_top&&y<=borderY_bottom){
+						var color=obrick.children[i].style.backgroundColor;
+						score.cal(color);
+						score.show();
+						obrick.removeChild(obrick.children[i]);
+						ball.yspeed=-ball.yspeed;
+					}
+				}
+				var block=oward.children[0],//挡板
+					blockX_left=parseInt(block.style.left)-r,
+					blockX_right=parseInt(block.style.left)+parseInt(block.style.width)+r,
+					blockY_top=parseInt(block.style.top)-r;
+					if(x<=blockX_right&&x>=blockX_left&&y>=blockY_top){
+						ball.yspeed=-ball.yspeed;
+					}
+					if(y>=innerHeight-15){
+						clearInterval(time)
+					}
+			}
+		}
+		function Score(){
+			this.score=0;
+			this.colors=["red","green","blue","yellow","magenta","cyan"];
+		}
+		Score.prototype={
+			constructor:Score,
+			cal:function(color){
+				if(color==this.colors[0]){
+					this.score=this.score+6;
+				}
+				else if(color==this.colors[1]){
+					this.score=this.score+5;
+				}
+				else if(color==this.colors[2]){
+					this.score=this.score+4;
+				}
+				else if(color==this.colors[3]){
+					this.score=this.score+3;
+				}
+				else if(color==this.colors[4]){
+					this.score=this.score+2;
+				}
+				else if(color==this.colors[5]){
+					this.score=this.score+1;
+				}
+				else{
+					this.score++;
+				}
+			},
+			show:function(){
+				oscore.innerHTML="分数："+this.score+"分";
+			}
+		}
+		var brick=new Brick(40,20,20,42,"#000");
+		brick.init();
+		var ward=new Ward(120,20,window.innerHeight-20,window.innerWidth/2-40,"#F2C68C");
+		ward.init()
+		var ball=new Ball(20,20,window.innerHeight-50,window.innerWidth/2-15,"#fff");
+		ball.init();
+		var score=new Score();
+
+	</script>
+</body>
+</html>
